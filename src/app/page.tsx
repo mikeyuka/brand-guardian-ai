@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   ShieldCheck, 
@@ -12,10 +14,38 @@ import {
   Globe,
   Lock,
   Menu,
-  X
+  X,
+  Loader2,
+  ShieldAlert
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const [asin, setAsin] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+
+  const handleQuickCheck = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!asin) return;
+    
+    setLoading(true);
+    setResult(null);
+    
+    try {
+      const response = await fetch('/api/v1/quick-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ asin }),
+      });
+      const data = await response.json();
+      setResult(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* Navigation */}
@@ -47,48 +77,70 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <header className="pt-40 pb-20 lg:pt-52 lg:pb-32 px-4 relative overflow-hidden">
+      <header className="pt-40 pb-20 lg:pt-52 lg:pb-32 px-4 relative overflow-hidden text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50" />
         </div>
 
-        <div className="max-w-4xl mx-auto text-center space-y-8 relative">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+        <div className="max-w-4xl mx-auto space-y-8 relative">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 mb-4">
             <Zap className="w-3.5 h-3.5 fill-current" />
             24/7 AUTONOMOUS PROTECTION
           </div>
           
-          <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+          <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
             Automated Peace of Mind for <span className="text-indigo-600">Amazon Brand Owners.</span>
           </h1>
           
-          <p className="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
+          <p className="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
             24/7 AI-powered hijacker detection and automated IP enforcement. Stop losing margins to counterfeiters while you sleep.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-            <Link 
-              href="/dashboard/onboarding" 
-              className="w-full sm:w-auto bg-indigo-600 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200 flex items-center justify-center gap-2 group"
-            >
-              Protect Your ASINs Now
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link 
-              href="#features" 
-              className="w-full sm:w-auto bg-white text-slate-700 border border-slate-200 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-            >
-              See How It Works
-            </Link>
-          </div>
-
-          {/* Social Proof Placeholder */}
-          <div className="pt-20 opacity-40 grayscale flex flex-wrap justify-center gap-8 lg:gap-16">
-            <span className="text-xl font-black italic tracking-widest uppercase">Forbes</span>
-            <span className="text-xl font-black italic tracking-widest uppercase">TechCrunch</span>
-            <span className="text-xl font-black italic tracking-widest uppercase">EcomWeekly</span>
-            <span className="text-xl font-black italic tracking-widest uppercase">MarketWatch</span>
+          {/* [C-04] Viral Risk Widget */}
+          <div className="max-w-xl mx-auto pt-8">
+            <div className="bg-white p-2 rounded-2xl shadow-2xl border border-slate-100 flex flex-col sm:flex-row gap-2 transition-all focus-within:ring-2 focus-within:ring-indigo-500">
+              <input 
+                type="text" 
+                placeholder="Enter ASIN (e.g. B08N5KWB9H)" 
+                className="flex-1 px-4 py-3 outline-none text-slate-900 font-medium"
+                value={asin}
+                onChange={(e) => setAsin(e.target.value)}
+              />
+              <button 
+                onClick={handleQuickCheck}
+                disabled={loading}
+                className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShieldAlert className="w-5 h-5" />}
+                Free Risk Audit
+              </button>
+            </div>
+            
+            {result && (
+              <div className="mt-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl text-left animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${result.riskScore > 70 ? 'bg-red-500' : result.riskScore > 30 ? 'bg-amber-500' : 'bg-green-500'}`} />
+                    <span className="text-sm font-bold text-slate-900">ASIN: {result.asin}</span>
+                  </div>
+                  <span className="text-xs font-bold text-slate-400">Risk Score: {result.riskScore}/100</span>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">{result.summary}</p>
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {result.threats.map((t: string) => (
+                    <span key={t} className="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded uppercase tracking-wider">{t}</span>
+                  ))}
+                </div>
+                <Link href="/dashboard/onboarding" className="text-indigo-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                  Fix this now <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
+            
+            <p className="mt-4 text-[10px] text-slate-400 font-medium uppercase tracking-widest flex items-center justify-center gap-2">
+              <Lock className="w-3 h-3" /> Encrypted & Secure Scan
+            </p>
           </div>
         </div>
       </header>

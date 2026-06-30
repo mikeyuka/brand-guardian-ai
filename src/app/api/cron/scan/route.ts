@@ -6,7 +6,6 @@ export async function GET() {
   console.log('Autonomous Scan Triggered:', new Date().toISOString());
 
   try {
-    // 1. Fetch all monitored items
     const { data: monitoredItems, error: fetchError } = await supabase
       .from('monitored_items')
       .select('*, brands(name)');
@@ -16,21 +15,18 @@ export async function GET() {
     const results = [];
 
     for (const item of monitoredItems || []) {
-      // 2. Mock a product data fetch (Simulating SP-API or Scraper)
-      // In a real scenario, this would call a scraper or Amazon API
       const mockProductData: ProductData = {
         identifier: item.identifier,
         title: `${item.brands.name} Professional Series - ${item.identifier}`,
-        price: item.msrp * (Math.random() < 0.2 ? 0.5 : 0.95), // 20% chance of a major price drop
+        price: item.msrp * (Math.random() < 0.2 ? 0.5 : 0.95),
         msrp: item.msrp,
         seller: Math.random() < 0.2 ? "QuickFake-Direct" : "Authorized Seller Inc",
         platform: item.platform,
+        brandId: item.brand_id // [C-02] Pass brandId for whitelist pre-filter
       };
 
-      // 3. Call the detection engine
       const detection = await detectThreat(mockProductData);
 
-      // 4. If high threat, log an incident
       if (detection.threatScore > 80) {
         const { error: incidentError } = await supabase.from('incidents').insert({
           monitored_item_id: item.id,
@@ -39,7 +35,6 @@ export async function GET() {
           threat_level: detection.threatScore > 90 ? 'critical' : 'high',
           status: 'pending',
           evidence_url: `https://www.amazon.com/dp/${item.identifier}`,
-          // Note: In real world, we'd save the AI reason in a metadata field if added to schema
         });
 
         if (incidentError) {

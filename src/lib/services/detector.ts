@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { supabase } from '@/lib/supabase';
 import { compareImages } from './vision';
 import { checkPriceParity } from './priceMonitor';
 
@@ -15,6 +16,7 @@ export interface ProductData {
   platform: string;
   imageUrl?: string;
   masterImageUrl?: string;
+  brandId?: string; // Needed for whitelist check
 }
 
 export interface DetectionResult {
@@ -26,13 +28,33 @@ export interface DetectionResult {
     mapViolation?: boolean;
     predatoryPricing?: boolean;
     priceGap?: number;
+    isWhitelisted?: boolean;
   };
 }
 
 export async function detectThreat(product: ProductData): Promise<DetectionResult> {
   console.log(`[Detector] Analyzing ${product.identifier} (${product.title})`);
 
-  // 1. Run Parallel Advanced Scans
+  // [C-02] Stage 1: Lightweight Pre-filter (Whitelist Check)
+  if (product.brandId) {
+    const { data: whitelistEntry } = await supabase
+      .from('whitelisted_sellers')
+      .select('id')
+      .eq('brand_id', product.brandId)
+      .eq('seller_name', product.seller)
+      .single();
+
+    if (whitelistEntry) {
+      console.log(`[Detector] Skipping AI calls for whitelisted seller: ${product.seller}`);
+      return {
+        threatScore: 0,
+        reason: "Authorized seller detected (Whitelisted).",
+        signals: { isWhitelisted: true }
+      };
+    }
+  }
+
+  // Stage 2: Full AI/Vision Analysis (High Cost)
   const [visionData, priceData] = await Promise.all([
     product.imageUrl && product.masterImageUrl 
       ? compareImages(product.imageUrl, product.masterImageUrl)
@@ -40,7 +62,6 @@ export async function detectThreat(product: ProductData): Promise<DetectionResul
     checkPriceParity(product.identifier, product.msrp)
   ]);
 
-  // 2. Prepare AI Prompt with Multi-Signal Data
   const prompt = `
     Analyze this e-commerce listing for brand violations.
     
@@ -90,7 +111,8 @@ export async function detectThreat(product: ProductData): Promise<DetectionResul
         logoMisuse: visionData?.logoMisuseDetected,
         mapViolation: priceData.mapViolation,
         predatoryPricing: priceData.predatoryPricing,
-        priceGap: priceData.gapPercentage
+        priceGap: priceData.gapPercentage,
+        isWhitelisted: false
       }
     };
   } catch (error) {
