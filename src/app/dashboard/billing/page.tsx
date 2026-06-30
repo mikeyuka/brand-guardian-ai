@@ -65,18 +65,39 @@ const plans = [
 export default function BillingPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const handleSubscription = (planName: string) => {
+  const handleSubscription = async (planName: string) => {
     if (planName === 'Enterprise') {
       window.location.href = 'mailto:sales@brandguardian.ai';
       return;
     }
     
     setLoadingPlan(planName);
-    // Mock Stripe Checkout simulation
-    setTimeout(() => {
-      alert(`Simulating Stripe checkout for ${planName} plan...`);
+    
+    try {
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tier: planName,
+          userId: 'user_placeholder_123', // In a real app, get this from auth context
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(`Error: ${data.error || 'Failed to create checkout session'}`);
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
       setLoadingPlan(null);
-    }, 1500);
+    }
   };
 
   return (
