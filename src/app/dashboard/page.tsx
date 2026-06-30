@@ -51,6 +51,28 @@ export default function DashboardPage() {
         />
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PriceChart 
+          productName="Aura Skin Serum (30ml)" 
+          msrp={35}
+          prices={[
+            { platform: 'Amazon', price: 34.99, isViolation: false },
+            { platform: 'eBay', price: 22.00, isViolation: true },
+            { platform: 'Temu', price: 18.50, isViolation: true }
+          ]}
+        />
+        <div className="bg-indigo-900 rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h3 className="text-xl font-bold mb-2">Automated Enforcement</h3>
+            <p className="text-indigo-200 text-sm mb-6 max-w-xs">Your AI engine is currently monitoring 48 listings across 3 platforms. 4 high-risk threats were neutralized today.</p>
+            <button className="bg-white text-indigo-900 font-bold py-2 px-6 rounded-lg text-sm hover:bg-indigo-50 transition-colors">
+              Configure RCE
+            </button>
+          </div>
+          <ShoppingBag className="absolute -right-8 -bottom-8 w-48 h-48 text-white/10 rotate-12" />
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
           <h2 className="font-semibold text-slate-900">Recent Incidents</h2>

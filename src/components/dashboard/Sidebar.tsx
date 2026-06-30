@@ -8,6 +8,7 @@ import {
   Search, 
   UserCheck, 
   AlertTriangle, 
+  Scale,
   Settings,
   LogOut
 } from 'lucide-react';
@@ -17,6 +18,7 @@ const menuItems = [
   { icon: Search, label: 'Monitored Items', href: '/dashboard/monitored-items' },
   { icon: UserCheck, label: 'Whitelist', href: '/dashboard/whitelist' },
   { icon: AlertTriangle, label: 'Incidents', href: '/dashboard/incidents' },
+  { icon: Scale, label: 'Compliance', href: '/dashboard/compliance' },
   { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
 ];
 
