@@ -19,6 +19,7 @@ export async function GET() {
       // 2. Mock a product data fetch (Simulating SP-API or Scraper)
       // In a real scenario, this would call a scraper or Amazon API
       const mockProductData: ProductData = {
+        identifier: item.identifier,
         title: `${item.brands.name} Professional Series - ${item.identifier}`,
         price: item.msrp * (Math.random() < 0.2 ? 0.5 : 0.95), // 20% chance of a major price drop
         msrp: item.msrp,
