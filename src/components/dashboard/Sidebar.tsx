@@ -9,6 +9,7 @@ import {
   UserCheck, 
   AlertTriangle, 
   Scale,
+  CreditCard,
   Settings,
   LogOut
 } from 'lucide-react';
@@ -19,6 +20,7 @@ const menuItems = [
   { icon: UserCheck, label: 'Whitelist', href: '/dashboard/whitelist' },
   { icon: AlertTriangle, label: 'Incidents', href: '/dashboard/incidents' },
   { icon: Scale, label: 'Compliance', href: '/dashboard/compliance' },
+  { icon: CreditCard, label: 'Billing', href: '/dashboard/billing' },
   { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
 ];
 
