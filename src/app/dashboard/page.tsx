@@ -4,9 +4,11 @@ import {
   AlertCircle, 
   CheckCircle2, 
   TrendingUp,
-  ExternalLink
+  ExternalLink,
+  ShoppingBag
 } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { PriceChart } from '@/components/dashboard/PriceChart';
 
 const recentIncidents = [
   { id: 1, item: 'Aura Skin Serum', platform: 'Amazon', seller: 'QuickShop Ltd', price: '$24.99', status: 'Pending', threat: 'High' },
